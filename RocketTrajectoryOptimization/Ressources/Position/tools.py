@@ -30,4 +30,4 @@ def spherical_to_cartesian(pos: np.ndarray) -> np.ndarray:
     X = pos[0]*math.sin(pos[2])*math.cos(pos[1])
     Y = pos[0]*math.sin(pos[2])*math.sin(pos[1])
     Z = pos[0]*math.cos(pos[2])
-    return np.array({X, Y, Z})
+    return np.array([X, Y, Z])
