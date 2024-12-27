@@ -1,37 +1,53 @@
 
-import math
 import numpy as np
 
+from RocketTrajectoryOptimization.Ressources.Datasheets.constants import RADIUS_EARTH
 import RocketTrajectoryOptimization.Ressources.Position.tools as tools
 
 class Atmosphere():
     def __init__(self):
-        pass
 
-    def Temp(self, height: float) -> float:
-        if height < 11000:
-            return 15.04 - 0.00649*height
-        elif height < 25000:
-            return -56.46
-        else:
-            return -131.21 + 0.00299*height
+        self.g0 = 9.80665  # Standard gravity (m/s²)
+        self.R = 287.05    # Specific gas constant for dry air (J/(kg·K))
 
-    def Pressure(self, height: float) -> float:
-        if height < 11000:
-            return 101.29*((self.Temp(height) + 273.15)/288.08)**5.256
-        elif height < 25000:
-            return 22.65*math.exp(1.73 - 0.000157*height)
-        else:
-            return 2.488*((self.Temp(height) + 273.15)/216.6)**(-11.388)
-    
-    def Density(self, height: float) -> float:
-        rho = self.Pressure(height) / (0.2869 * (self.Temp(height) - 273.15))
-        if rho < 0:
-            return 0
-        return rho
+        self.layers = [
+        {"h_b": 0, "T_b": 288.15, "P_b": 101325, "L": -0.0065},
+        {"h_b": 11000, "T_b": 216.65, "P_b": 22632.1, "L": 0.0},
+        {"h_b": 20000, "T_b": 216.65, "P_b": 5474.89, "L": 0.001},
+        {"h_b": 32000, "T_b": 228.65, "P_b": 868.019, "L": 0.0028},
+        {"h_b": 47000, "T_b": 270.65, "P_b": 110.906, "L": 0.0},
+        {"h_b": 51000, "T_b": 270.65, "P_b": 66.9389, "L": -0.0028},
+        {"h_b": 71000, "T_b": 214.65, "P_b": 3.95642, "L": -0.002}
+        ]
 
     def __call__(self, pos: np.ndarray) -> float:
         positions = tools.cartesian_to_spheircal(pos)
-        height = positions[0]
-        return self.Density(height)
+        altitude = positions[0] - RADIUS_EARTH
+        if altitude > 175000:
+            return 0 
+
+        for layer in self.layers:
+            if altitude >= layer["h_b"]:
+                h_b = layer["h_b"]
+                T_b = layer["T_b"]
+                P_b = layer["P_b"]
+                L = layer["L"]
+
+        if L != 0:  # Non-isothermal layer
+            T = T_b + L * (altitude - h_b)
+            P = P_b * (T / T_b) ** (-self.g0 / (L * self.R))
+        else:  # Isothermal layer
+            T = T_b
+            P = P_b * np.exp(-self.g0 * (altitude - h_b) / (self.R * T))
+        
+        rho = P / (self.R * T)
+        return rho
+
+       
+
+if __name__ == "__main__":
+    atm = Atmosphere()
+    for i in range(1, 500):
+        print(f"{i*1000} => {atm(i*1000)}")
+
 
