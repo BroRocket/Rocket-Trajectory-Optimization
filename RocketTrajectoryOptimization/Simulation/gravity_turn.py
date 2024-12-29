@@ -1,5 +1,6 @@
 
 import numpy as np
+from scipy.optimize import root
 
 from RocketTrajectoryOptimization.Vehicle.vehicle import Vehicle
 from RocketTrajectoryOptimization.Ressources.Phys import gravity, drag
@@ -39,10 +40,13 @@ class GravityTurnSim():
         self.ROCKET.reset()
 
 
-    def run_launch(self, pitchover_height, pitchover_angle, dt: float):
+    def run_launch(self, manuever: list):
 
+        pitchover_height = manuever[0]
+        pitchover_angle = manuever[1]
         t = 0
         maneuver_completed = False
+        self.iniatialize()
 
         while True:
 
@@ -50,22 +54,28 @@ class GravityTurnSim():
             velocity_unit_vector= tools.unit_vector(velocity)
             if np.linalg.norm(self.STATE.pos) - self.GRAVITY.RE == self.orbit_altitude and self.desired_velocity * velocity_unit_vector == self.STATE.vel:
                 break
-            if len(self.ROCKET.stages) == 0:
+            if len(self.ROCKET.stages) == 0: # check if no delta v left
                 break
             
             #run time step, update position
             if maneuver_completed == False and (tools.cartesian_to_spheircal(self.STATE.pos))[0] - self.GRAVITY.RE >= pitchover_height:
-                # adjust direction of thrust 
-                thrust_accel = self.ROCKET.update(tools.unit_vector(self.STATE.vel), dt) # need to figure this out still
+                # adjust direction of thrust
+                rotation_axis = np.cross(self.STATE.vel, velocity_unit_vector)
+                rotation_axis = tools.unit_vector(rotation_axis)
+                skew_symmetric = np.array([[0, -rotation_axis[2], rotation_axis[1]], [rotation_axis[2], 0, -rotation_axis[0]], [-rotation_axis[1], rotation_axis[0], 0]])
+                rotation_matrix = np.identity(3) + np.sin(pitchover_angle)*skew_symmetric + (1 - np.cos(pitchover_angle))*(skew_symmetric**2)
+                thrust_dir = velocity_unit_vector*rotation_matrix
+                thrust_dir = tools.unit_vector(thrust_dir)
+                thrust_accel = self.ROCKET.update(thrust_dir, self.dt) # need to figure this out still
             else:
-                thrust_accel = self.ROCKET.update(tools.unit_vector(self.STATE.vel), dt)
+                thrust_accel = self.ROCKET.update(tools.unit_vector(self.STATE.vel), self.dt)
             
             gravity_accel = self.GRAVITY(self.STATE.pos)
             drag_accel = self.DRAG(self.STATE.pos, self.STATE.vel, self.ROCKET.Cd, self.ROCKET.diameter, self.ROCKET.mass)
             accel = thrust_accel + gravity_accel + drag_accel
-            self.STATE.update(accel, dt)
+            self.STATE.update(accel, self.dt)
 
-            t += dt
+            t += self.dt
 
             if t > 10000:
                 raise Exception("Program has run a sim for over 10000 seconds")
@@ -76,10 +86,9 @@ class GravityTurnSim():
         altitude = (tools.cartesian_to_spheircal(self.STATE.pos))[0] - self.GRAVITY.RE
         res1 = np.sum(residual_velocity)/3
         res2 = self.orbit_altitude - altitude
+
+        return [res1, res2]
         
-
-            # check if no delta v left
-
 
     def optimize(self, pitchover_height_guess, pitchover_angle_guess, dt: float):
         '''
@@ -87,5 +96,8 @@ class GravityTurnSim():
         run sim see residuals
         
         '''
-
+        # use root finding
+        self.dt = dt
+        sol = root(self.run_launch, [pitchover_height_guess, pitchover_angle_guess]).x
+        print(sol)
 

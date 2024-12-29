@@ -16,5 +16,12 @@ class State():
         self.ACCELERATIONS = [self.accel]
 
     def update(self, accel: np.ndarray, dt: float):
-        '''use rk4 scheme'''
-        # finsih this
+        '''use rk4 scheme, could be imporved but would reqire computing accel over and over whihc is tricky witht eh ay vehicle is set up'''
+
+        self.accel = accel
+        self.pos += self.vel * dt + 0.5*self.accel*dt**2
+        self.vel += self.accel * dt
+        
+        self.ACCELERATIONS.append(self.accel)
+        self.VELOCITIES.append(self.vel)
+        self.POSITIONS.append(self.pos)

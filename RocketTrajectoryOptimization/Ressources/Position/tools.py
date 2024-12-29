@@ -27,11 +27,9 @@ def spherical_to_cartesian(pos: np.ndarray) -> np.ndarray:
     '''(r, theta, psi)'''
     if len(pos) != 3:
         raise Exception(f"Position tuple is not the correct length. Has length {len(pos)}")
-    print(pos)
     X = pos[0]*math.sin(pos[1])*math.cos(pos[2])
     Y = pos[0]*math.sin(pos[1])*math.sin(pos[2])
     Z = pos[0]*math.cos(pos[1])
-    print(X, Y, Z)
     return np.array([X, Y, Z])
 
 def accel_spherical_to_cartesian(accel_spherical: np.ndarray, position: np.ndarray) -> np.ndarray:
