@@ -14,8 +14,11 @@ class Drag():
 
         # this may change
         proj_area = math.pi*(vehicle_diamter/2)**2
-
-        drag_force = (-0.5*Cd*density*proj_area*np.linalg.norm(vel)**2) * unit_vector(vel)
-        drag_accel = drag_force/vehicle_mass
+        vel_mag = np.linalg.norm(vel)
+        if vel_mag == 0:
+            return np.array([0, 0 ,0], dtype=np.float64)
+        else:
+            drag_force = (-0.5*Cd*density*proj_area*vel_mag**2) * unit_vector(vel)
+            drag_accel = drag_force/vehicle_mass
 
         return drag_accel

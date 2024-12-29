@@ -7,11 +7,11 @@ def unit_vector(vec: np.ndarray):
     return vec/np.linalg.norm(vec)
 
 def orbitalspherical_conv(pos: np.ndarray) -> np.ndarray:
-    '''(r, Longitude, lattitude), note lat and long in degrees'''
+    '''(r, lattitude, longitude), note lat and long in degrees'''
     if len(pos) != 3:
         raise Exception(f"Position tuple is not the correct length. Has length {len(pos)}")
     PSI = (90 - pos[2]*180/math.pi)*math.pi/180 # just relace with pi/2
-    return np.array([pos[0], pos[1], PSI])
+    return np.array([pos[0], PSI, pos[1]], dtype=np.float64)
 
 def cartesian_to_spheircal(pos: np.ndarray) -> np.ndarray:
     '''(x, y, z)'''
@@ -21,7 +21,7 @@ def cartesian_to_spheircal(pos: np.ndarray) -> np.ndarray:
     R = np.sqrt((pos[0]*pos[0] + pos[1]*pos[1] + pos[2]*pos[2]))
     THETA = np.arctan(pos[1]/pos[0]) 
     PSI = np.arccos(pos[2]/R)
-    return np.array([R, THETA, PSI])
+    return np.array([R, THETA, PSI], dtype=np.float64)
 
 def spherical_to_cartesian(pos: np.ndarray) -> np.ndarray:
     '''(r, theta, psi)'''
@@ -30,7 +30,7 @@ def spherical_to_cartesian(pos: np.ndarray) -> np.ndarray:
     X = pos[0]*math.sin(pos[1])*math.cos(pos[2])
     Y = pos[0]*math.sin(pos[1])*math.sin(pos[2])
     Z = pos[0]*math.cos(pos[1])
-    return np.array([X, Y, Z])
+    return np.array([X, Y, Z], dtype=np.float64)
 
 def accel_spherical_to_cartesian(accel_spherical: np.ndarray, position: np.ndarray) -> np.ndarray:
     """

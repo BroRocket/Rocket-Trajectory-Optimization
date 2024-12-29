@@ -25,12 +25,19 @@ class GravityTurnSim():
 
         #find unit vector in direction of orbit
         #assume that RAAND is 0 at first 
-        right_ascension = np.radians(self.launch_longitude) + np.arcsin(np.tan(self.launch_lattitude)/np.tan(self.orbit_inclination))
-        self.launch_pos = np.array([self.GRAVITY.RE, self.launch_longitude, self.launch_lattitude]) #orbital
+        if self.orbit_inclination != 0:
+            right_ascension = np.radians(self.launch_longitude) + np.arcsin(np.tan(self.launch_lattitude)/np.tan(self.orbit_inclination))
+        else:
+            right_ascension = np.radians(self.launch_longitude) + np.arcsin(np.tan(self.launch_lattitude))
+        # fucking up this here in conversion
+        self.launch_pos = np.array([self.GRAVITY.RE, self.launch_lattitude, self.launch_longitude], dtype=np.float64) #orbital
         self.launch_pos = tools.spherical_to_cartesian(tools.orbitalspherical_conv(self.launch_pos)) #cartesian now
-        self.RAAN_pos = tools.spherical_to_cartesian(np.array([self.GRAVITY.RE, right_ascension, np.pi/2]))
+        self.RAAN_pos = tools.spherical_to_cartesian(np.array([self.GRAVITY.RE, np.pi/2, right_ascension], dtype=np.float64))
         orbital_vector = np.cross(self.launch_pos, self.RAAN_pos)
-        self.orbital_unit_vector = tools.unit_vector(orbital_vector)
+        if np.linalg.norm(orbital_vector) == 0: # handles equitorial launch and orbit, on't be correct for incline equitorial orbits need to fix this
+            self.orbital_unit_vector = np.array([0, 0, 1], dtype=np.float64)
+        else:
+            self.orbital_unit_vector = tools.unit_vector(orbital_vector)
         
 
     def iniatialize(self):
@@ -64,11 +71,16 @@ class GravityTurnSim():
                 rotation_axis = tools.unit_vector(rotation_axis)
                 skew_symmetric = np.array([[0, -rotation_axis[2], rotation_axis[1]], [rotation_axis[2], 0, -rotation_axis[0]], [-rotation_axis[1], rotation_axis[0], 0]])
                 rotation_matrix = np.identity(3) + np.sin(pitchover_angle)*skew_symmetric + (1 - np.cos(pitchover_angle))*(skew_symmetric**2)
-                thrust_dir = velocity_unit_vector*rotation_matrix
+                thrust_dir = np.dot(rotation_matrix, velocity_unit_vector)
                 thrust_dir = tools.unit_vector(thrust_dir)
-                thrust_accel = self.ROCKET.update(thrust_dir, self.dt) # need to figure this out still
+                thrust_accel = self.ROCKET.update(thrust_dir, self.dt) # check if this is working
+                maneuver_completed = True
             else:
-                thrust_accel = self.ROCKET.update(tools.unit_vector(self.STATE.vel), self.dt)
+                if np.linalg.norm(self.STATE.vel) == 0:
+                    thrust_dir = tools.unit_vector(self.STATE.pos)
+                else:
+                    thrust_dir = tools.unit_vector(self.STATE.vel)
+                thrust_accel = self.ROCKET.update(thrust_dir, self.dt)
             
             gravity_accel = self.GRAVITY(self.STATE.pos)
             drag_accel = self.DRAG(self.STATE.pos, self.STATE.vel, self.ROCKET.Cd, self.ROCKET.diameter, self.ROCKET.mass)

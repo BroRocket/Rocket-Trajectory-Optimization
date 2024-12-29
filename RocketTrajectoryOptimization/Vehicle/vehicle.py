@@ -42,7 +42,9 @@ class Vehicle():
 
     def update(self, thrust_dir: np.ndarray, dt: float):
         if self.stages[0].update_mass(dt) is False:
-            mass = self.stage_sep()
+            mass = self.stage_sep(dt)
+            if len(self.stages) == 0:
+                return np.array([0, 0, 0], dtype=np.float64)
         else:
             self.mass = sum([stage.mass for stage in self.stages])
             mass =  self.mass + 0.5*dt*self.stages[0].engine.MDOT # half mass whihc is average that accel acts on over dt
