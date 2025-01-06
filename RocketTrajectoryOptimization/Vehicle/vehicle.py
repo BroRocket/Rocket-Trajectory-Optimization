@@ -24,6 +24,9 @@ class Vehicle():
             if self.Cd < stage.Cd:
                 self.Cd = stage.Cd
         self.STAGES_CPY = self.stages.copy()
+        # self.staging = False
+        # self.stage_delay = 0
+        # self.time_passed = 0
 
     def reset(self):
         self.stages = self.STAGES_CPY
@@ -41,10 +44,18 @@ class Vehicle():
                 self.Cd = stage.Cd
 
     def update(self, thrust_dir: np.ndarray, dt: float):
+        # if self.staging is True:
+        #     if self.time_passed < self.stage_delay:
+        #         self.time_passed += dt
+        #     else:
+        #         self.staging = False
+        #         self.time_passed = 0
+        #     return np.array([0, 0, 0])
         if self.stages[0].update_mass(dt) is False:
             mass = self.stage_sep(dt)
             if len(self.stages) == 0:
                 return np.array([0, 0, 0], dtype=np.float64)
+            # self.staging = True
         else:
             self.mass = sum([stage.mass for stage in self.stages])
             mass =  self.mass + 0.5*dt*self.stages[0].engine.MDOT # half mass whihc is average that accel acts on over dt

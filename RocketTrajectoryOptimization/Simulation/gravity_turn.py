@@ -45,10 +45,12 @@ class GravityTurnSim():
         
         self.STATE = state.State(self.GRAVITY.RE, self.launch_lattitude, self.launch_longitude)
         self.ROCKET.reset()
+        #self.ROCKET.stage_delay = stage_delay
 
 
     def run_launch(self, manuever: list):
 
+        print(manuever)
         pitchover_height = manuever[0]
         pitchover_angle = manuever[1]
         t = 0
@@ -98,8 +100,10 @@ class GravityTurnSim():
         altitude = (tools.cartesian_to_spheircal(self.STATE.pos))[0] - self.GRAVITY.RE
         res1 = np.sum(residual_velocity)/3
         res2 = self.orbit_altitude - altitude
-
-        return [res1, res2]
+        residuals = [res1, res2]
+        print(residuals)
+        return residuals
+       
         
 
     def optimize(self, pitchover_height_guess, pitchover_angle_guess, dt: float):

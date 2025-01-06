@@ -22,6 +22,6 @@ class State():
         self.pos += self.vel * dt + 0.5*self.accel*dt**2
         self.vel += self.accel * dt
         
-        self.ACCELERATIONS.append(self.accel)
-        self.VELOCITIES.append(self.vel)
-        self.POSITIONS.append(self.pos)
+        self.ACCELERATIONS.append(self.accel.copy())
+        self.VELOCITIES.append(self.vel.copy())
+        self.POSITIONS.append(self.pos.copy())

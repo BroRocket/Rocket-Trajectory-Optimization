@@ -23,8 +23,10 @@ class Atmosphere():
     def __call__(self, pos: np.ndarray) -> float:
         positions = tools.cartesian_to_spheircal(pos)
         altitude = positions[0] - RADIUS_EARTH
-        if altitude > 175000:
+        if altitude > 170000:
             return 0 
+        if altitude < 0:
+            return 0 #quick fix
 
         for layer in self.layers:
             if altitude >= layer["h_b"]:
