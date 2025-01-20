@@ -1,5 +1,6 @@
 
 import numpy as np
+import copy
 
 from RocketTrajectoryOptimization.Ressources.Position.state import State
 from RocketTrajectoryOptimization.Vehicle.stage import Stage
@@ -23,7 +24,7 @@ class Vehicle():
                 self.diameter = stage.diameter
             if self.Cd < stage.Cd:
                 self.Cd = stage.Cd
-        self.STAGES_CPY = self.stages.copy()
+        self.STAGES_CPY = copy.deepcopy(self.stages)
         # self.staging = False
         # self.stage_delay = 0
         # self.time_passed = 0

@@ -53,8 +53,10 @@ class GravityTurnSim():
         print(manuever)
         pitchover_height = manuever[0]
         pitchover_angle = manuever[1]
+        burn_time = manuever[2]
         t = 0
         maneuver_completed = False
+        initial_mass = self.ROCKET.mass
         self.iniatialize()
 
         while True:
@@ -90,7 +92,9 @@ class GravityTurnSim():
             self.STATE.update(accel, self.dt)
 
             t += self.dt
-
+            if t > burn_time:
+                print("had fuel left")
+                break
             if t > 10000:
                 raise Exception("Program has run a sim for over 10000 seconds")
 
@@ -100,13 +104,14 @@ class GravityTurnSim():
         altitude = (tools.cartesian_to_spheircal(self.STATE.pos))[0] - self.GRAVITY.RE
         res1 = np.sum(residual_velocity)/3
         res2 = self.orbit_altitude - altitude
-        residuals = [res1, res2]
+        res3 = 0
+        residuals = [res1, res2, res3]
         print(residuals)
         return residuals
        
         
 
-    def optimize(self, pitchover_height_guess, pitchover_angle_guess, dt: float):
+    def optimize(self, pitchover_height_guess, pitchover_angle_guess, burn_time, dt: float):
         '''
         start with intial guess,
         run sim see residuals
@@ -114,6 +119,6 @@ class GravityTurnSim():
         '''
         # use root finding
         self.dt = dt
-        sol = root(self.run_launch, [pitchover_height_guess, pitchover_angle_guess]).x
+        sol = root(self.run_launch, [pitchover_height_guess, pitchover_angle_guess, burn_time]).x
         print(sol)
 

@@ -4,6 +4,8 @@ import numpy as np
 from RocketTrajectoryOptimization.Ressources.Datasheets.constants import RADIUS_EARTH
 import RocketTrajectoryOptimization.Ressources.Position.tools as tools
 
+#update this to better model leanred in class
+
 class Atmosphere():
     def __init__(self):
 

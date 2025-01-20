@@ -7,18 +7,18 @@ from RocketTrajectoryOptimization.Simulation.gravity_turn import GravityTurnSim
 from RocketTrajectoryOptimization.Vehicle import stage, engine, vehicle
 
 eng = engine.Engine(900, 350)
-stg1 = stage.Stage(2.5, 15, 0.8, 10000, 90000, eng)
+stg1 = stage.Stage(2.5, 15, 0.8, 10000, 100000, eng)
 eng2 = engine.Engine(100, 390)
-stg2 = stage.Stage(2.5, 5, 0.8, 2000, 6000, eng2)
+stg2 = stage.Stage(2.5, 5, 0.8, 2000, 7000, eng2)
 rocket = vehicle.Vehicle(2000, [stg1, stg2])
 # siome resson R is at z posiiton either conversion issue or iniatialization issue
-sim = GravityTurnSim(rocket, 200000, 0, 0, 0)
+sim = GravityTurnSim(rocket, 250000, 0, 0, 0)
 sim.dt = 0.1
 
-sim.optimize(10, np.radians(45), 0.1)
+#sim.optimize(9, np.radians(87), 170, 0.05)
 
 #maybe ad solution blockers
-sim.run_launch([5, np.radians(70)]) # not sure if gimbaling is done right
+#sim.run_launch([8, np.radians(90), 181.1]) # not sure if gimbaling is done right
 
 
 def plot_trajectory(positions, velocities, accelerations, vector_interval=50, vector_scale=0.1):
