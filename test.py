@@ -6,19 +6,19 @@ from mpl_toolkits.mplot3d import Axes3D
 from RocketTrajectoryOptimization.Simulation.gravity_turn import GravityTurnSim
 from RocketTrajectoryOptimization.Vehicle import stage, engine, vehicle
 
-eng = engine.Engine(900, 350)
-stg1 = stage.Stage(2.5, 15, 0.8, 10000, 100000, eng)
-eng2 = engine.Engine(100, 390)
-stg2 = stage.Stage(2.5, 5, 0.8, 2000, 7000, eng2)
-rocket = vehicle.Vehicle(2000, [stg1, stg2])
+eng = engine.Engine(2740.26212, 297.5)
+stg1 = stage.Stage(3.7, 47.7, 0.8, 25600, 395700, eng)
+eng2 = engine.Engine(287.4544842, 348)
+stg2 = stage.Stage(3.7, 13.8, 0.8, 3900, 92670, eng2)
+rocket = vehicle.Vehicle(10000, [stg1, stg2])
 # siome resson R is at z posiiton either conversion issue or iniatialization issue
-sim = GravityTurnSim(rocket, 250000, 0, 0, 0)
+sim = GravityTurnSim(rocket, 300000, 0, 0, 0)
 sim.dt = 0.1
 
-#sim.optimize(9, np.radians(87), 170, 0.05)
+#sim.optimize(200, np.radians(87), 435, 0.05)
 
 #maybe ad solution blockers
-#sim.run_launch([8, np.radians(90), 181.1]) # not sure if gimbaling is done right
+sim.run_launch([165, np.radians(80), 430]) # not sure if gimbaling is done right
 
 
 def plot_trajectory(positions, velocities, accelerations, vector_interval=50, vector_scale=0.1):
@@ -80,7 +80,7 @@ print(sim.STATE.pos[0] - sim.GRAVITY.RE)
 plot_trajectory(sim.STATE.POSITIONS, sim.STATE.VELOCITIES, sim.STATE.ACCELERATIONS, 20, 0.3)
 
 TIME_STEP = 1  # seconds
-TOTAL_TIME = 5*3600 # 24 hours in seconds
+TOTAL_TIME = 7*3600 # 24 hours in seconds
 NUM_STEPS = int(TOTAL_TIME / TIME_STEP)
 
 positions = np.zeros((NUM_STEPS, 3))
